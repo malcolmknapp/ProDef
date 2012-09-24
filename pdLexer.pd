@@ -1,0 +1,141 @@
+Product Definition Lexer
+
+:::Introduction
+The Product Definition Lexer is for automatically formating and folding a
+product definition document so it is easier to read. This make it possible to
+use a text file to store all the whole product definition. This in turn allows
+the use of all the tools that are available for code, i.e version control,
+branching, diffs, etc for design documents.
+
+This lexer handles the formating and color of Product Definition documents.
+Product Defintion documents are meant to be structured enough that they can be
+programmatically parsed but also human readable. These document treat everything
+as a string and uses various transition words to signal the chnages between
+formatting states
+---
+::: Conventions
+//: A To-Be-Determined requirement
+[ ... ]: Future Feature
+---
+
+::: Product Characteristics
+    Target Cost: Free under an open source licence
+    ---
+
+Product Definition Lexer
+:::Feature List
+    ::: Colored Product defintion is easy to read
+    Characteristics
+        
+    ---
+    ::: Colors Section Headers
+    Characteristics
+        Section Headers
+            - Introduction
+            - Conventions
+            - Product Characteristics
+            - Feature List
+            - Interface List
+            - Behavior Definition
+            - Proceses
+            - Detailed Behavior
+            - Implementation
+    ---
+    ::: Color Lists
+    Characteristics
+        List Types
+            Events
+            Characteristics
+            
+                Implementation
+            
+    ---  
+    ::: Color Table
+    Characteristics
+        Types
+            Command Definition tables
+            LED display Tables
+        Alternate display colors to show 'cell'
+        Color background of 'cell'
+    ---
+    ::: Output Report
+    Characteristics
+        Automatic Generation
+        Cotrollable Format
+        Output only one section of the document
+        
+        
+    ---
+    ::: Show Incomplete Sections
+    Characteristics
+            Indication of areas where information needs to be added
+            
+                Implementation
+    ---
+
+    ::: Word wrap for Paragraphs
+    Characteristics
+            Standard Wrap limit is 80 characters
+            Applies to all paragrapgh sections
+            
+                Implementation
+                    Uses two macros to turn on and off word wrap
+                    Wrap point is set in Preferences
+    
+    ---
+    ::: Folding
+    Characteristics
+        Fold on Section Headings, Lists, and Tables
+        When fully collapesed the document should take up one page
+        
+            Implementation
+                Fold entry on: on three colons
+                Fold exit on: on three dashes
+
+                
+    
+    
+    --- 
+---
+
+Behavior Definition
+::: Product States
+    NORMAL
+    TABLE
+    FUTURE FEATURE
+    INCOMPLETE SECTION
+    CHARACTERISTICS LIST
+    EVENT
+    
+    ---
+
+::: Intial State: In NORMAL
+    Event: "Introduction:" is written
+        go to INTRODUCTION
+        
+        
+    Event: "[" is written
+        go to FUTURE FEATURE
+        
+    Event: "Conventions" is written
+        Got to CONVENTIONS
+        
+    Event: "Characteristics:" is written
+        go to CHARACTERISTICS LIST
+    
+    Event: "Initial State" is written
+        Go to STATE
+    
+    Event: "Event:"  is written
+        Go to EVENT
+        
+---
+::: Initail State: In FUTURE FEATUE
+
+    Event: "]" is written
+        go to NORMAL
+---
+
+::: Intial State: ANY
+    Event: "---" is written
+        Go to NORMAL

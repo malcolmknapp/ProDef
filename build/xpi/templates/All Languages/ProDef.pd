@@ -1,0 +1,50 @@
+INSERT PRODUCT NAME Defintion
+
+:::Introduction
+---
+:::Conventions
+//: A To-Be-Determined requirement
+[ ... ]: Future Feature
+---
+
+:::Product Characteristics
+    Weight:
+    Height (X): 
+    Length (Y):
+    Width (Z): 
+    Product Life Time Target:
+    Operating Temperature: 
+---
+
+INSERT PRODUCT NAME
+::: Feature List
+    LIST ALL FEATURES
+    
+    FEATURE 1
+    Characteristics
+---
+
+::: Interface List
+---
+::: Security
+---
+::: Regulation
+---
+::: Mechanical
+---
+::: Manufacturing
+---
+
+Behavior Definition
+
+::: Product States
+    INSERT PRODUCT STATES
+---
+::: Processes
+---
+::: Detailed Behavior
+---
+::: Appendices
+    ::: Appendix A: Glossary
+    ---
+---
