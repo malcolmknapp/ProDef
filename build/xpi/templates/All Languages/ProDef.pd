@@ -1,6 +1,7 @@
 INSERT PRODUCT NAME Defintion
 
 :::Introduction
+    ADD INTRODUCTION
 ---
 :::Conventions
 //: A To-Be-Determined requirement
@@ -22,9 +23,13 @@ INSERT PRODUCT NAME
     
     FEATURE 1
     Characteristics
+        -
+        
 ---
 
 ::: Interface List
+    Characteristics
+        
 ---
 ::: Security
 ---
@@ -43,6 +48,10 @@ Behavior Definition
 ::: Processes
 ---
 ::: Detailed Behavior
+    EVENT 1
+        - Step 1
+        
+        
 ---
 ::: Appendices
     ::: Appendix A: Glossary
