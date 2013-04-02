@@ -26,6 +26,8 @@ state IN_M_DEFAULT:
 
 family ssl # server side language
 
+pattern OP = '<>'
+
 # Specify the min and max styles we'll be referring to.
 start_style SSL_DEFAULT
 end_style SSL_VARIABLE
@@ -33,16 +35,8 @@ end_style SSL_VARIABLE
 # If the language has keywords, specify which style needs to be transformed
 keyword_style SSL_IDENTIFIER => SSL_WORD
 keywords [
-        'two words' # Keywords
+         # Keywords
         ]
-
-# Set the basic patterns we'll be using for styling transitions.
-# For most programming languages, names cannot start with a number, but they
-# often allow a number after the first character - e.g. "bar21a"
-pattern FIRSTNAMECHAR = '_a-zA-Z\x80-\xff' # names (identifier, keyword, variable...) only can start with these chars
-pattern NAMECHAR = '$FIRSTNAMECHAR\d'      # rest of the name, after the first char
-pattern WS = '\t\r'                    # whitespace
-pattern OP = '!%&\(\)\*\+,-\.\/:;<>\?@\^\{\}~|'  # operator characters - escaping special regex values
 
 ################ Default Style ################
 
@@ -50,95 +44,105 @@ pattern OP = '!%&\(\)\*\+,-\.\/:;<>\?@\^\{\}~|'  # operator characters - escapin
 # the transitions to other states.'
 state IN_SSL_DEFAULT:
 
-# ----------- Entering Comments ---------- #
 
-# C-style one line comments
-'//' : paint(upto, SSL_DEFAULT),  => IN_SSL_COMMENT_TO_EOL
+'"'  : paint(upto, SSL_DEFAULT), => IN_QUOTE
+'//' : paint(upto, SSL_DEFAULT), => IN_SSL_INCOMPLETE_TO_EOL
+'?' : paint(upto, M_ATTRNAME),  => IN_SSL_INCOMPLETE_TO_EOL
+'/*' : paint(upto, SSL_DEFAULT), => IN_SSL_INCOMPLETE_C_BLOCK
+'['  : paint(upto, SSL_DEFAULT), => IN_FUTURE_FEATURE
 
-# C-style block comments
-'/*' : paint(upto, SSL_DEFAULT), => IN_SSL_COMMENT_C_BLOCK
+/[$OP]/  : paint(upto, SSL_DEFAULT), paint(include, SSL_OPERATOR)
 
-# ----------- Entering Whitespace ---------- #
+/\|+[a-zA-z]/ : paint (upto, SSL_DEFAULT), => IN_HEADING
+'Characteristics' : paint (upto, SSL_DEFAULT), => IN_HEADING
+'Implementation' : paint (upto, SSL_DEFAULT), => IN_HEADING
+'Behavior' : paint (upto, SSL_DEFAULT), => IN_HEADING
 
-# Just stay in whatever style we currently are using.
-/[$WS]+/  : #stay
+/^\s{8}-\s/ : paint (include, SSL_DEFAULT), => IN_LIST_TO_EOL_1
+/^\s{12}-\s/ : paint (include, SSL_DEFAULT), => IN_LIST_TO_EOL_2
+/^\s{16}-\s/ : paint (include, SSL_DEFAULT), => IN_LIST_TO_EOL_3
+/^\s{20}-\s/ : paint (include, SSL_DEFAULT), => IN_LIST_TO_EOL_4
 
-# ----------- Entering Strings ---------- #
+/^\s{8}\#\s/ : paint (include, SSL_DEFAULT), => IN_LIST_TO_EOL_1
+/^\s{12}\#\s/ : paint (include, SSL_DEFAULT), => IN_LIST_TO_EOL_2
+/^\s{16}\#\s/ : paint (include, SSL_DEFAULT), => IN_LIST_TO_EOL_3
+/^\s{20}\#\s/ : paint (include, SSL_DEFAULT), => IN_LIST_TO_EOL_4
 
-#'\'' : paint(upto, SSL_DEFAULT), => IN_SSL_SSTRING
-
-
-# ----------- Entering Numbers ---------- #
-
-# Go process a number, try to do it in regexes octal and hex first.
-/0[Xx][0-9a-fA-F]+/ : paint(upto, SSL_DEFAULT), paint(include, SSL_NUMBER)  # Hex numbers
-/[-+]?0[0-7]*/ : paint(upto, SSL_DEFAULT), paint(include, SSL_NUMBER)       # Octal numbers
-/[-+]?[1-9]+/ : paint(upto, SSL_DEFAULT), paint(include, SSL_NUMBER)        # Regular numbers
-
-# ----------- Entering Identifiers ---------- #
-
-#/[$FIRSTNAMECHAR][$NAMECHAR]*/ : paint(upto, SSL_DEFAULT), paint(include, SSL_IDENTIFIER)
-
-# ----------- Entering Operators ---------- #
-
-#/[$OP]/ : paint(upto, SSL_DEFAULT), paint(include, SSL_OPERATOR)
+/===+\n/ : paint (include, SSL_DEFAULT), => IN_TABLE_A
 
 
-################ In Comments - determines how we exit a comment ################
-
-state IN_SSL_COMMENT_TO_EOL: 
-/[\r\n]/ : paint(upto, SSL_COMMENT), => IN_SSL_DEFAULT  # back to default state
-
-state IN_SSL_COMMENT_C_BLOCK: 
-'*/' : paint(include, SSL_COMMENTBLOCK), => IN_SSL_DEFAULT  # back to default state
-
-
-################ In Strings - determines how we exit a string ################
-
-#state IN_SSL_DSTRING:  # indicates a future feature
-#'\'' : paint(include, SSL_STRING), => IN_SSL_DEFAULT  # back to default state
-#/\\./ : #stay, anything escaped means it's still a string
 
 
 ################ Start of State Handling ################
-state IN_SSL_DEFAULT:
-/^\s+Characteristics/ : paint (upto, SSL_DEFAULT), => IN_CHARACTERISTICS_LIST
-/===+/ : paint (include, SSL_DEFAULT), => IN_TABLE_A
+state IN_QUOTE:
+'"' : paint (include, SSL_WORD), spop_check => IN_SSL_DEFAULT
 
-state IN_CHARACTERISTICS_LIST:
-/^\s+Implementation/ : paint (upto, M_CDATA), => IN_IMPLEMENTATION_LIST
-/^\s+Bahvior/ : paint (upto, M_CDATA), => IN_BEHAVIOR_LIST
-/---/ : paint (upto, M_CDATA), redo, => IN_SSL_DEFAULT
+state IN_SSL_INCOMPLETE_TO_EOL:
+/[\r\n]/ : paint(upto, SSL_COMMENT), => IN_SSL_DEFAULT  # back to default state
 
-state IN_IMPLEMENTATION_LIST:
-/---/ : paint (upto, M_ATTRNAME), redo, => IN_CHARACTERISTICS_LIST
+state IN_SSL_INCOMPLETE_C_BLOCK: 
+'*/' : paint(include, SSL_COMMENTBLOCK), => IN_SSL_DEFAULT  # back to default state
 
-state IN_BEHAVIOR_LIST:
-/---/ : paint (upto, M_ATTRNAME), redo, => IN_CHARACTERISTICS_LIST
+state IN_HEADING:
+/[\r\n]/ : paint(upto, SSL_WORD), => IN_SSL_DEFAULT  # back to default state
+
+state IN_LIST_TO_EOL_1:
+'['  : paint(upto, M_ATTRNAME), => IN_FUTURE_FEATURE
+'//' : paint(upto, M_ATTRNAME),  => IN_SSL_INCOMPLETE_TO_EOL
+'?' : paint(upto, M_ATTRNAME),  => IN_SSL_INCOMPLETE_TO_EOL
+'"'  : paint(upto, M_ATTRNAME),spush_check(IN_LIST_TO_EOL_1), => IN_QUOTE
+/[\r\n]/ : paint(upto, M_ATTRNAME), => IN_SSL_DEFAULT  # back to default state
+
+state IN_LIST_TO_EOL_2:
+'['  : paint(upto, M_CDATA), => IN_FUTURE_FEATURE
+'//' : paint(upto, M_CDATA),  => IN_SSL_INCOMPLETE_TO_EOL
+'?' : paint(upto, M_ATTRNAME),  => IN_SSL_INCOMPLETE_TO_EOL
+'"'  : paint(upto, M_ATTRNAME),spush_check(IN_LIST_TO_EOL_2), => IN_QUOTE
+/[\r\n]/ : paint(upto, M_CDATA), => IN_SSL_DEFAULT  # back to default state
+
+state IN_LIST_TO_EOL_3:
+
+'['  : paint(upto, M_ENTITY), => IN_FUTURE_FEATURE
+'//' : paint(upto, M_ENTITY),  => IN_SSL_INCOMPLETE_TO_EOL
+'?' : paint(upto, M_ATTRNAME),  => IN_SSL_INCOMPLETE_TO_EOL
+'"'  : paint(upto, M_ATTRNAME),spush_check(IN_LIST_TO_EOL_3), => IN_QUOTE
+/[\r\n]/ : paint(upto, M_ENTITY), => IN_SSL_DEFAULT  # back to default state
+
+state IN_LIST_TO_EOL_4:
+'['  : paint(upto, M_PI), => IN_FUTURE_FEATURE
+'//' : paint(upto, M_PI),  => IN_SSL_INCOMPLETE_TO_EOL
+'?' : paint(upto, M_ATTRNAME),  => IN_SSL_INCOMPLETE_TO_EOL
+'"'  : paint(upto, M_ATTRNAME),spush_check(IN_LIST_TO_EOL_4), => IN_QUOTE
+/[\r\n]/ : paint(upto, M_PI), => IN_SSL_DEFAULT  # back to default state
+
+
+
+state IN_FUTURE_FEATURE:
+']' : paint(include, SSL_IDENTIFIER), => IN_SSL_DEFAULT  # back to default state
 
 
 state IN_TABLE_A:
-/^=+/ : paint (upto, SSL_DEFAULT), => IN_SSL_DEFAULT
-/[a-zA-Z]\s\s+/ : paint (include, SSL_VARIABLE),  => IN_TABLE_B
-/[a-zA-Z\?\)\]]+\n/  : paint (include, SSL_VARIABLE), => IN_TABLE_B
+/==+/ : paint (upto, SSL_DEFAULT), => IN_SSL_DEFAULT
+/[a-zA-Z0-9\?\)\]]\s\s+/ : paint (include, SSL_VARIABLE),  => IN_TABLE_B
+/[a-zA-Z0-9\?\)\]"\.]+\n/  : paint (include, SSL_VARIABLE), => IN_TABLE_B
+
 
 
 state IN_TABLE_B:
-/^===+/ : paint (upto, SSL_DEFAULT), => IN_SSL_DEFAULT
-/[a-zA-Z]\s\s+/ : paint (include, SSL_REGEX),  => IN_TABLE_A
-/[a-zA-Z?\)\]]+\n/  : paint (include, SSL_REGEX), => IN_TABLE_A
-
+/===+/ : paint (upto, SSL_DEFAULT), => IN_SSL_DEFAULT
+/[a-zA-Z0-9\?\)\]]\s\s+/ : paint (include, SSL_REGEX),  => IN_TABLE_A
+/[a-zA-Z0-9\?\)\]"\.]+\n/  : paint (include, SSL_REGEX), => IN_TABLE_A
 
 
 ################ End of State Handling ################
 
 
-
-
 ################ Fold Handling ################
 
-fold ":::" SSL_OPERATOR +
+fold ">>" SSL_OPERATOR +
 fold "<-->" SSL_OPERATOR +
-fold "---" SSL_OPERATOR -
+fold "<<" SSL_OPERATOR -
 
 ################ End of Fold Handling ################
+
+

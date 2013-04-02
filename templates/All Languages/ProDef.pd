@@ -1,59 +1,91 @@
-INSERT PRODUCT NAME Defintion
+||INSERT PRODUCT NAME Definition
 
-:::Introduction
-    ADD INTRODUCTION
----
-:::Conventions
-//: A To-Be-Determined requirement
-[ ... ]: Future Feature
----
+>>||Introduction
+ADD INTRODUCTION
+<<
+>>|Conventions
+//: A To-Be-Determined requirement. Color set by the Comments element type
+[ ... ]: Future Feature. Color set by the Identifier element type
+|HEADING : Marks a Heading. Color set by the Keyword element type
+        - : 8 spaces and a dash marks a list. Color set by the Attribute Name element type
+            - :12 spaces and a dash marks a sublist 1. Color set by the Cdata element type 
+                - :16 spaces and a dash marks a sublist 2. Color set by the Entity Reference element type
+                    - :20 spaces and a dash marks a sublist 3. Color set by the Pi Content element Type
+"" : Marks a quote. Inside quotes bracket, pipes, and forward slashes do not have an effect. Color set by the Keyword element time
+================================================================================
+Cell 1     Cell 2 : marks a table. Cell colors alternate and are set by the Regex and Variable element types
+================================================================================
+>> : marks beginning of a fold
+<< : marks the end of a fold
 
-:::Product Characteristics
-    Weight:
-    Height (X): 
-    Length (Y):
-    Width (Z): 
-    Product Life Time Target:
-    Operating Temperature: 
----
+<<
 
-INSERT PRODUCT NAME
-::: Feature List
-    LIST ALL FEATURES
-    
-    FEATURE 1
+>> ||Product Characteristics
+        - Weight:
+        - Height (X): 
+        - Length (Y):
+        - Width (Z):
+        - Target Cots: 
+        - Product Life Time Target:
+        - Operating Temperature: 
+<<
+
+||INSERT DEVICE 1 NAME
+>> |Feature List
+    >>|FEATURE 1
     Characteristics
-        -
-        
----
+        - Characteristic
+            - Subcharacteristic
+                - Subcharacteristic
+                    - Subcharacteristic
+    <<
+<<
 
-::: Interface List
+>> ||Interface List
+    |FROM <--> TO
     Characteristics
-        
----
-::: Security
----
-::: Regulation
----
-::: Mechanical
----
-::: Manufacturing
----
+        - Characteristic
+Command Definition
+================================================================================
+Command             Description                                                 
+================================================================================
 
-Behavior Definition
+<<
+>> |Security
+<<
+>> |Regulation
+<<
+>> |Mechanical
+<<
+>> |Manufacturing
+<<
 
-::: Product States
+||Behavior Definition
+>> |Processes
+    >>|PROCESS 1
+    Characteristics
+        - 
+    Behavior
+        - 
+    <<
+<<
+>> ||Product States
     INSERT PRODUCT STATES
----
-::: Processes
----
-::: Detailed Behavior
-    EVENT 1
-        - Step 1
-        
-        
----
-::: Appendices
-    ::: Appendix A: Glossary
-    ---
----
+<<
+>> ||Detailed Behavior
+
+    >>|Initial State: INSERT STATE
+        >>|EVENT 1
+            # Step 1
+                # Substep 1
+                    # Substep 2
+        <<
+    <<
+<<
+>> |Appendices
+    >> Appendix A: Glossary
+================================================================================
+    Term                          Description                                   
+================================================================================
+    <<
+<<
